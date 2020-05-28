@@ -1,13 +1,10 @@
-// C program to find Burrows Wheeler transform
-// of a given text
-
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
+#include <string>
 
 // Parameters
 const std::string inputFileName = "enwik8";
@@ -27,12 +24,13 @@ void ReadFile()
     InputString += (char)2;
     size_t dataSize = InputString.size();
     std::cout << dataSize << std::endl;
-
 }
 
+// Write file
 void WriteFile()
 {
     // write the vector output to file
+    std::cout << "Finished\n";
     std::ofstream outStream(outputFileName, std::ofstream::out | std::ofstream::binary);
     long outSize = encodedOut.size();
     for (int i = 0; i < outSize; i++)
@@ -41,68 +39,55 @@ void WriteFile()
     }
 }
 
-// Structure to store data of a rotation
-struct rotation
+// class to store the rotations of strings
+class rotation
 {
+public:
     int index;
     char *suffix;
 };
 
-// Compares the rotations and
-// sorts the rotations alphabetically
+// Compares the rotations and sorts alphabetically
 int cmpfunc(const void *x, const void *y)
 {
-    struct rotation *rx = (struct rotation *)x;
-    struct rotation *ry = (struct rotation *)y;
+    rotation *rx = (rotation *)x;
+    rotation *ry = (rotation *)y;
     return strcmp(rx->suffix, ry->suffix);
 }
 
-// Takes text to be transformed and its length as
-// arguments and returns the corresponding suffix array
+// Computes Suffix array from the Input and returns it
 int *computeSuffixArray(char *input_text, int len_text)
 {
-    // Array of structures to store rotations and
-    // their indexes
-    struct rotation *suff = new struct rotation[len_text];
+    // Array of rotations to store them
+    rotation *suff = new rotation[len_text];
 
-    // Structure is needed to maintain old indexes of
-    // rotations after sorting them
+    // Save the Indices and values for every rotation
     for (int i = 0; i < len_text; i++)
     {
         suff[i].index = i;
         suff[i].suffix = (input_text + i);
     }
 
-    // Sorts rotations using comparison
-    // function defined above
-    qsort(suff, len_text, sizeof(struct rotation),
-          cmpfunc);
+    // Sorting rotations
+    qsort(suff, len_text, sizeof(rotation), cmpfunc);
 
     // Stores the indexes of sorted rotations
-    int *suffix_arr = (int *)malloc(len_text * sizeof(int));
+    int *suffix_arr = new int[len_text];
     for (int i = 0; i < len_text; i++)
         suffix_arr[i] = suff[i].index;
 
-    // deallocate memory
-    delete[] suff;
-    // Returns the computed suffix array
     return suffix_arr;
 }
 
-// Takes suffix array and its size
-// as arguments and returns the
-// Burrows - Wheeler Transform of given text
-char *findLastChar(char *input_text,
-                   int *suffix_arr, int n)
+// Computes Burrows Wheeler from Suffix array
+char *BWTfromSuffix(char *input_text, int *suffix_arr, int n)
 {
-    // Iterates over the suffix array to find
-    // the last char of each cyclic rotation
-    char *bwt_arr = (char *)malloc(n * sizeof(char));
+    //Find Last char of every rotation
+    char *bwt_arr = new char[n];
     int i;
     for (i = 0; i < n; i++)
     {
-        // Computes the last char which is given by
-        // input_text[(suffix_arr[i] + n - 1) % n]
+        // Computes the last char which is given by [(suffix_arr[i] + n - 1) % n]
         int j = suffix_arr[i] - 1;
         if (j < 0)
             j = j + n;
@@ -111,12 +96,9 @@ char *findLastChar(char *input_text,
     }
 
     bwt_arr[i] = '\0';
-
-    // Returns the computed Burrows - Wheeler Transform
     return bwt_arr;
 }
 
-// Driver program to test functions above
 int main()
 {
     ReadFile();
@@ -125,9 +107,8 @@ int main()
     // Computes the suffix array of our text
     int *suffix_arr = computeSuffixArray(&InputString[0], len_text);
 
-    // Adds to the output array the last char
-    // of each rotation
-    char *bwt_arr = findLastChar(&InputString[0], suffix_arr, len_text);
+    // Takes the Last char from every rotation to Create BWT
+    char *bwt_arr = BWTfromSuffix(&InputString[0], suffix_arr, len_text);
 
     encodedOut = bwt_arr;
     WriteFile();

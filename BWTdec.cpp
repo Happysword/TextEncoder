@@ -1,6 +1,6 @@
 // Inverse BWT Transform
 
-#include <string.h> 
+#include <string.h>
 #include <string>
 #include <iostream>
 #include <vector>
@@ -40,52 +40,57 @@ void WriteFile()
     }
 }
 
-void invert(std::string bwt_arr) 
-{ 
-	int i,len_bwt = bwt_arr.size(); 
-	std::string sorted_bwt = bwt_arr;
-	int* l_shift = new int[len_bwt]; 
+void invert(std::string bwt_arr)
+{
+    int i, len_bwt = bwt_arr.size();
+    std::vector<uint8_t> sorted_bwt(len_bwt);
+    std::copy(bwt_arr.begin(),bwt_arr.end(),sorted_bwt.begin());
+    int *l_shift = new int[len_bwt];
 
-	// Index at which original string appears 
-	int x = bwt_arr.find( (char)2 ); 
-    if( x == std::string::npos) std::cout<<"ERROR: char not found";
+    // Index at which original string appears
+    int x = bwt_arr.find((char)2);
+    if (x == std::string::npos)
+        std::cout << "ERROR: char not found";
 
-	// Sorts the characters of bwt_arr[] alphabetically 
-	std::sort(sorted_bwt.begin(), sorted_bwt.end()); 
-    std::cout<<"\n Sorted \n";
+    // Sorts the characters of bwt_arr[] alphabetically
+    std::sort(sorted_bwt.begin(), sorted_bwt.end());
+    std::cout << "\n Sorted \n";
 
     // Vector of Lists for every Character
-	std::vector< std::list<int> > arr(128);
-
+    std::vector<std::list<int>> arr(256);
     // Adds the indices of every character to its list in arr ascendingly
-	for (i = 0; i < len_bwt; i++) { 
-	    arr[ bwt_arr[i] ].push_back(i);
-	} 
-    std::cout<<"\n Added All to last \n";
+    for (i = 0; i < len_bwt; i++)
+    {
+        arr[ (uint8_t)bwt_arr[i] ].push_back(i);
+    }
+
+    std::cout << "\n Added All to last \n";
 
     // takes the shifted version of each character
-	for (i = 0; i < len_bwt; i++) {
-        l_shift[i] = arr[ sorted_bwt[i] ].front();   
-        arr[ sorted_bwt[i] ].pop_front();   
+    for (i = 0; i < len_bwt; i++)
+    {
+        l_shift[i] = arr[(uint8_t)sorted_bwt[i] ].front();
+        arr[(uint8_t)sorted_bwt[i] ].pop_front();
     }
-    std::cout<<"\n Shifted All characters \n";
+    std::cout << "\n Shifted All characters \n";
 
     // set size of string
     decodedout.reserve(len_bwt);
-	// Decodes the bwt 
-	for (i = 0; i < len_bwt; i++) { 
-		x = l_shift[x]; 
-		decodedout += bwt_arr[x];
-	} 
+    // Decodes the bwt
+    for (i = 0; i < len_bwt; i++)
+    {
+        x = l_shift[x];
+        decodedout += bwt_arr[x];
+    }
     // remove last character
     decodedout.pop_back();
-} 
+}
 
-// Driver program to test functions above 
-int main() 
-{ 
+// Driver program to test functions above
+int main()
+{
     ReadFile();
-	invert(&InputString[0]); 
+    invert(&InputString[0]);
     WriteFile();
-	return 0; 
-} 
+    return 0;
+}

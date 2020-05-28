@@ -7,8 +7,8 @@ lzwencode: enclzw.cpp
 lzwdecode: declzw.cpp
 	g++ -std=c++17 -O3 declzw.cpp -o lzwdecode
 
-bwtencode: bwtencode.cpp
-	g++ -std=c++17 -O3 bwtencode.cpp -o bwtencode
+bwtencode: BWTenc.cpp
+	g++ -std=c++17 -O3 BWTenc.cpp -o bwtencode
 
 bwtdecode: BWTdec.cpp
 	g++ -std=c++17 -O3 BWTdec.cpp -o bwtdecode
