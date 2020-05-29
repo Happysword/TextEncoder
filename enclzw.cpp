@@ -22,18 +22,12 @@ const std::string outputFileName = "lzwenc.bin";
 
 using CodeType = std::uint32_t;
 
-/// Dictionary Maximum Size (when reached, the dictionary will be reset)
+/// Dictionary Maximum Size
 // Used as a BreakPoint instead of NULL for BST
-namespace globals
-{
-    const CodeType dms{13000 * 1024};
-}
+const CodeType maxDictSize = 13000 * 1024;
 
 // character to control decoding
-enum class MetaCode : CodeType
-{
-    Eof = 1u << CHAR_BIT, ///< End-of-file.
-};
+const CodeType Eof = 1u << CHAR_BIT; ///< End-of-file.
 
 // Encoder Class
 class EncoderDictionary
@@ -41,7 +35,7 @@ class EncoderDictionary
     // Node for BST
     struct Node
     {
-        explicit Node(char c) : first(globals::dms), c(c), left(globals::dms), right(globals::dms) {}
+        explicit Node(char c) : first(maxDictSize), c(c), left(maxDictSize), right(maxDictSize) {}
 
         CodeType first; // Code of first child string.
         char c;
@@ -57,7 +51,7 @@ public:
         const int maxc = std::numeric_limits<char>::max();
         CodeType k{0};
 
-        vn.reserve(globals::dms);
+        vn.reserve(maxDictSize);
         vn.clear();
 
         for (int c = minc; c <= maxc; ++c) {
@@ -70,22 +64,22 @@ public:
     }
 
     // Searches for a pair (i, c) and inserts the pair if it wasn't found.
-    // if found returns index , else return globals::dms
+    // if found returns index , else return maxDictSize
     CodeType search_and_insert(CodeType i, char c)
     {
-        if (i == globals::dms)
+        if (i == maxDictSize)
             return search_initials(c);
 
         const CodeType vn_size = vn.size();
         CodeType ci{vn[i].first}; // Current Index
 
         // Searching the BST 
-        if (ci != globals::dms)
+        if (ci != maxDictSize)
         {
             while (true)
                 if (c < vn[ci].c)
                 {
-                    if (vn[ci].left == globals::dms)
+                    if (vn[ci].left == maxDictSize)
                     {
                         vn[ci].left = vn_size;
                         break;
@@ -95,7 +89,7 @@ public:
                 }
                 else if (c > vn[ci].c)
                 {
-                    if (vn[ci].right == globals::dms)
+                    if (vn[ci].right == maxDictSize)
                     {
                         vn[ci].right = vn_size;
                         break;
@@ -110,7 +104,7 @@ public:
             vn[i].first = vn_size;
 
         vn.push_back(Node(c));
-        return globals::dms;
+        return maxDictSize;
     }
 
     // Returns Code of char c from the initial one-byte part of the dictionary
@@ -153,7 +147,7 @@ public:
     // Destructor to write the leftover bits when finished
     ~CodeWriter()
     {
-        write(static_cast<CodeType>(MetaCode::Eof));
+        write(static_cast<CodeType>(Eof));
 
         // write the incomplete leftover byte
         if (lo.used != 0)
@@ -226,14 +220,14 @@ void compress(std::istream &is, std::ostream &os)
 {
     EncoderDictionary ed;
     CodeWriter cw(os);
-    CodeType i{globals::dms}; // Index
+    CodeType i{maxDictSize}; // Index
     char c;
 
     while (is.get(c))
     {
         const CodeType temp{i};
 
-        if ((i = ed.search_and_insert(temp, c)) == globals::dms)
+        if ((i = ed.search_and_insert(temp, c)) == maxDictSize)
         {
             cw.write(temp);
             i = ed.search_initials(c);
@@ -244,7 +238,7 @@ void compress(std::istream &is, std::ostream &os)
 
     }
 
-    if (i != globals::dms)
+    if (i != maxDictSize)
         cw.write(i);
 }
 
