@@ -1,5 +1,5 @@
 
-all: bwtdecode bwtencode
+all: lzwencode lzwdecode
 
 lzwencode: enclzw.cpp
 	g++ -std=c++17 -O3 enclzw.cpp -o lzwencode
