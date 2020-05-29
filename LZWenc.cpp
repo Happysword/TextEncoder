@@ -16,9 +16,6 @@
 #include <utility>
 #include <vector>
 
-// Parameters
-const std::string inputFileName_enc = "enwik8";
-const std::string outputFileName_enc = "lzwenc.bin";
 
 using CodeType = std::uint32_t;
 
@@ -242,13 +239,13 @@ void compress(std::istream &is, std::ostream &os)
         cw.write(i);
 }
 
-int LZWenc()
+int LZWenc(std::string inputFileName, std::string outputFileName)
 {
     std::ifstream input_file;
     std::ofstream output_file;
 
-    input_file.open(inputFileName_enc, std::ios_base::binary);
-    output_file.open(outputFileName_enc, std::ios_base::binary);
+    input_file.open(inputFileName, std::ios_base::binary);
+    output_file.open(outputFileName, std::ios_base::binary);
 
     // main compress function
     compress(input_file, output_file);

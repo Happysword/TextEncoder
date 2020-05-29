@@ -10,26 +10,23 @@
 #include <list>
 
 // Parameters
-const std::string inputFileName = "bwtout.txt";
-const std::string outputFileName = "bwtdecoded.txt";
-std::string InputString;
+std::string EncInputString;
 std::string decodedout;
 
 //Read file
 
-void ReadFile()
+void DecReadFile(std::string inputFileName)
 {
     // read file and put it to string
     std::ifstream inputStream(inputFileName);
     std::stringstream sstream;
     sstream << inputStream.rdbuf();
-    InputString = sstream.str();
-    size_t dataSize = InputString.size();
-    std::cout << dataSize << std::endl;
+    EncInputString = sstream.str();
+    size_t dataSize = EncInputString.size();
 
 }
 
-void WriteFile()
+void DecWriteFile(std::string outputFileName)
 {
     // write the vector output to file
     std::ofstream outStream(outputFileName, std::ofstream::out | std::ofstream::binary);
@@ -54,7 +51,6 @@ void invert(std::string bwt_arr)
 
     // Sorts the characters of bwt_arr[] alphabetically
     std::sort(sorted_bwt.begin(), sorted_bwt.end());
-    std::cout << "\n Sorted \n";
 
     // Vector of Lists for every Character
     std::vector<std::list<int>> arr(256);
@@ -64,15 +60,12 @@ void invert(std::string bwt_arr)
         arr[ (uint8_t)bwt_arr[i] ].push_back(i);
     }
 
-    std::cout << "\n Added All to last \n";
-
     // takes the shifted version of each character
     for (i = 0; i < len_bwt; i++)
     {
         l_shift[i] = arr[(uint8_t)sorted_bwt[i] ].front();
         arr[(uint8_t)sorted_bwt[i] ].pop_front();
     }
-    std::cout << "\n Shifted All characters \n";
 
     // set size of string
     decodedout.reserve(len_bwt);
@@ -86,11 +79,11 @@ void invert(std::string bwt_arr)
     decodedout.pop_back();
 }
 
-// Driver program to test functions above
-int main()
+
+int BWTdec(std::string inputFileName, std::string outputFileName)
 {
-    ReadFile();
-    invert(&InputString[0]);
-    WriteFile();
+    DecReadFile(inputFileName);
+    invert(&EncInputString[0]);
+    DecWriteFile(outputFileName);
     return 0;
 }

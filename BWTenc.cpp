@@ -7,14 +7,12 @@
 #include <string>
 
 // Parameters
-const std::string inputFileName = "enwik8";
-const std::string outputFileName = "bwtout.txt";
 std::string InputString;
 std::string encodedOut;
 
 //Read file
 
-void ReadFile()
+void ReadFile(std::string inputFileName)
 {
     // read file and put it to string
     std::ifstream inputStream(inputFileName);
@@ -23,14 +21,12 @@ void ReadFile()
     InputString = sstream.str();
     InputString += (char)2;
     size_t dataSize = InputString.size();
-    std::cout << dataSize << std::endl;
 }
 
 // Write file
-void WriteFile()
+void WriteFile(std::string outputFileName)
 {
     // write the vector output to file
-    std::cout << "Finished\n";
     std::ofstream outStream(outputFileName, std::ofstream::out | std::ofstream::binary);
     long outSize = encodedOut.size();
     for (int i = 0; i < outSize; i++)
@@ -99,9 +95,10 @@ char *BWTfromSuffix(char *input_text, int *suffix_arr, int n)
     return bwt_arr;
 }
 
-int main()
+
+int BWTenc(std::string inputFileName, std::string outputFileName)
 {
-    ReadFile();
+    ReadFile(inputFileName);
     int len_text = InputString.size();
 
     // Computes the suffix array of our text
@@ -111,7 +108,7 @@ int main()
     char *bwt_arr = BWTfromSuffix(&InputString[0], suffix_arr, len_text);
 
     encodedOut = bwt_arr;
-    WriteFile();
+    WriteFile(outputFileName);
 
     return 0;
 }

@@ -17,9 +17,6 @@
 #include <utility>
 #include <vector>
 
-// Parameters
-const std::string inputFileName = "lzwenc.bin";
-const std::string outputFileName = "lzwdecoded.txt";
 
 /// Type used to store and retrieve codes.
 using CodeType = std::uint32_t;
@@ -180,7 +177,7 @@ void decompress(std::istream &is, std::ostream &os)
     }
 }
 
-int LZWdec()
+int LZWdec(std::string inputFileName, std::string outputFileName)
 {
     std::ifstream input_file;
     std::ofstream output_file;
