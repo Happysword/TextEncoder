@@ -180,7 +180,7 @@ void decompress(std::istream &is, std::ostream &os)
     }
 }
 
-int main()
+int LZWdec()
 {
     std::ifstream input_file;
     std::ofstream output_file;

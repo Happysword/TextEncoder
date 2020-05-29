@@ -12,3 +12,6 @@ bwtencode: BWTenc.cpp
 
 bwtdecode: BWTdec.cpp
 	g++ -std=c++17 -O3 BWTdec.cpp -o bwtdecode
+
+main: LZWdec.cpp LZWenc.cpp Main.cpp
+	g++ -std=c++17 -O3 Main.cpp -o main

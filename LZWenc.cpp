@@ -17,17 +17,17 @@
 #include <vector>
 
 // Parameters
-const std::string inputFileName = "enwik8";
-const std::string outputFileName = "lzwenc.bin";
+const std::string inputFileName_enc = "enwik8";
+const std::string outputFileName_enc = "lzwenc.bin";
 
 using CodeType = std::uint32_t;
 
 /// Dictionary Maximum Size
 // Used as a BreakPoint instead of NULL for BST
-const CodeType maxDictSize = 13000 * 1024;
+const CodeType DictSizemax = 13000 * 1024;
 
 // character to control decoding
-const CodeType Eof = 1u << CHAR_BIT; ///< End-of-file.
+const CodeType Eof_enc = 1u << CHAR_BIT; ///< End-of-file.
 
 // Encoder Class
 class EncoderDictionary
@@ -35,7 +35,7 @@ class EncoderDictionary
     // Node for BST
     struct Node
     {
-        explicit Node(char c) : first(maxDictSize), c(c), left(maxDictSize), right(maxDictSize) {}
+        explicit Node(char c) : first(DictSizemax), c(c), left(DictSizemax), right(DictSizemax) {}
 
         CodeType first; // Code of first child string.
         char c;
@@ -51,7 +51,7 @@ public:
         const int maxc = std::numeric_limits<char>::max();
         CodeType k{0};
 
-        vn.reserve(maxDictSize);
+        vn.reserve(DictSizemax);
         vn.clear();
 
         for (int c = minc; c <= maxc; ++c) {
@@ -64,22 +64,22 @@ public:
     }
 
     // Searches for a pair (i, c) and inserts the pair if it wasn't found.
-    // if found returns index , else return maxDictSize
+    // if found returns index , else return DictSizemax
     CodeType search_and_insert(CodeType i, char c)
     {
-        if (i == maxDictSize)
+        if (i == DictSizemax)
             return search_initials(c);
 
         const CodeType vn_size = vn.size();
         CodeType ci{vn[i].first}; // Current Index
 
         // Searching the BST 
-        if (ci != maxDictSize)
+        if (ci != DictSizemax)
         {
             while (true)
                 if (c < vn[ci].c)
                 {
-                    if (vn[ci].left == maxDictSize)
+                    if (vn[ci].left == DictSizemax)
                     {
                         vn[ci].left = vn_size;
                         break;
@@ -89,7 +89,7 @@ public:
                 }
                 else if (c > vn[ci].c)
                 {
-                    if (vn[ci].right == maxDictSize)
+                    if (vn[ci].right == DictSizemax)
                     {
                         vn[ci].right = vn_size;
                         break;
@@ -104,7 +104,7 @@ public:
             vn[i].first = vn_size;
 
         vn.push_back(Node(c));
-        return maxDictSize;
+        return DictSizemax;
     }
 
     // Returns Code of char c from the initial one-byte part of the dictionary
@@ -128,9 +128,9 @@ private:
 };
 
 // helper class to store leftover bits
-struct ByteCache
+struct ByteCache_enc
 {
-    ByteCache() : used(0), data(0x00) {}
+    ByteCache_enc() : used(0), data(0x00) {}
 
     std::size_t used;   ///< Bits currently in use.
     unsigned char data; ///< The bits of the cached byte.
@@ -147,7 +147,7 @@ public:
     // Destructor to write the leftover bits when finished
     ~CodeWriter()
     {
-        write(static_cast<CodeType>(Eof));
+        write(static_cast<CodeType>(Eof_enc));
 
         // write the incomplete leftover byte
         if (lo.used != 0)
@@ -199,13 +199,13 @@ public:
     }
 
 private:
-    ByteCache lo;     ///< LeftOvers.
+    ByteCache_enc lo;     ///< LeftOvers.
     std::ostream &os; ///< Output Stream.
     std::size_t bits; ///< Binary width of codes.
 };
 
 // Computes the number of bits required to store n.
-std::size_t required_bits(unsigned long int n)
+std::size_t required_bits_enc(unsigned long int n)
 {
     std::size_t r{1};
 
@@ -220,35 +220,35 @@ void compress(std::istream &is, std::ostream &os)
 {
     EncoderDictionary ed;
     CodeWriter cw(os);
-    CodeType i{maxDictSize}; // Index
+    CodeType i{DictSizemax}; // Index
     char c;
 
     while (is.get(c))
     {
         const CodeType temp{i};
 
-        if ((i = ed.search_and_insert(temp, c)) == maxDictSize)
+        if ((i = ed.search_and_insert(temp, c)) == DictSizemax)
         {
             cw.write(temp);
             i = ed.search_initials(c);
 
-            if (required_bits(ed.size() - 1) > cw.get_bits())
+            if (required_bits_enc(ed.size() - 1) > cw.get_bits())
                 cw.increase_bits();
         }
 
     }
 
-    if (i != maxDictSize)
+    if (i != DictSizemax)
         cw.write(i);
 }
 
-int main()
+int LZWenc()
 {
     std::ifstream input_file;
     std::ofstream output_file;
 
-    input_file.open(inputFileName, std::ios_base::binary);
-    output_file.open(outputFileName, std::ios_base::binary);
+    input_file.open(inputFileName_enc, std::ios_base::binary);
+    output_file.open(outputFileName_enc, std::ios_base::binary);
 
     // main compress function
     compress(input_file, output_file);
